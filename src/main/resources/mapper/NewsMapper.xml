@@ -1,0 +1,60 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.community.mapper.NewsMapper">
+	<insert id="insert" parameterType="NewsItem"
+		useGeneratedKeys="true" keyProperty="id">
+		INSERT INTO news_item(source,
+		title, link, published_at, summary, raw_text)
+		VALUES(#{source},
+		#{title}, #{link}, #{publishedAt}, #{summary},
+		#{rawText})
+	</insert>
+
+	<!-- mapper/NewsMapper.xml -->
+	<resultMap id="NewsItemMap"
+		type="com.example.community.domain.NewsItem">
+		<id property="id" column="id" />
+		<result property="source" column="source" />
+		<result property="title" column="title" />
+		<result property="summary" column="summary" />
+		<result property="link" column="link" />
+		<!-- 핵심: TIMESTAMP -> java.util.Date -->
+		<result property="publishedAt" column="published_at"
+			jdbcType="TIMESTAMP" javaType="java.util.Date" />
+	</resultMap>
+
+	<select id="findByLink" parameterType="string"
+		resultType="NewsItem">
+		SELECT * FROM news_item WHERE link=#{link}
+	</select>
+
+	<select id="findByDateRange" resultMap="NewsItemMap">
+		SELECT * FROM news_item
+		WHERE published_at BETWEEN #{start} AND #{end}
+		ORDER BY published_at
+		DESC
+	</select>
+
+	<!-- 날짜별 카운트는 문자열로 반환(안전) -->
+	<select id="countGroupByDate" resultMap="NewsItemMap">
+		SELECT DATE_FORMAT(published_at, '%Y-%m-%d') AS d,
+		COUNT(*) AS cnt
+		FROM news_item
+		WHERE published_at >= DATE_SUB(CURDATE(), INTERVAL #{days} DAY)
+		GROUP BY DATE(published_at)
+		ORDER BY d DESC
+	</select>
+
+	<select id="latest" resultMap="NewsItemMap">
+		SELECT id, source, title, summary, link, published_at
+		FROM news_item
+		ORDER BY published_at DESC
+		LIMIT #{limit}
+	</select>
+
+	<select id="findById" resultMap="NewsItemMap">
+		SELECT id, source, title, summary, link, published_at
+		FROM news_item
+		WHERE id = #{id}
+	</select>
+</mapper>

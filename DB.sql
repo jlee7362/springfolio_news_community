@@ -1,0 +1,28 @@
+DROP DATABASE IF EXISTS springfolio;
+CREATE DATABASE springfolio;
+USE springfolio;
+
+CREATE TABLE article (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  update_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  member_id BIGINT NOT NULL,
+  title VARCHAR(200) NOT NULL,
+  body TEXT NOT NULL,
+  hit INT DEFAULT 0
+);
+
+CREATE TABLE news_item (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT,
+  reg_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  source VARCHAR(100) NOT NULL,
+  title VARCHAR(300) NOT NULL,
+  link VARCHAR(1000) NOT NULL,
+  published_at DATETIME NOT NULL,
+  summary TEXT NOT NULL,
+  raw_text MEDIUMTEXT,
+  UNIQUE KEY uk_news_link (link)
+);
+
+-- 날짜별 조회 최적화
+CREATE INDEX idx_news_published_at ON news_item(published_at);
