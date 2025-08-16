@@ -5,12 +5,11 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
+import java.util.Date;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -29,8 +28,8 @@ public class CrawlerService {
 
   private static final ZoneId KST = ZoneId.of("Asia/Seoul");
 
-//10초 후 첫 실행, 이후 1시간마다
-@Scheduled(initialDelay = 10_000, fixedDelay = 3_600_000)
+//10초 후 첫 실행, 이후 2시간마다
+@Scheduled(initialDelay = 10_000, fixedDelay = 7_200_000)
 public void crawl() {
     final java.util.List<String> feeds = rssProps.getFeeds();
     System.out.println("feeds = " + feeds); // 진단용
@@ -62,11 +61,13 @@ public void crawl() {
             publishedAt = zdt.withZoneSameInstant(KST).toLocalDateTime();
           } catch (Exception ignored) {}
 
+          Date publishedAtDate = Date.from(publishedAt.atZone(KST).toInstant());
+          
           NewsItem n = new NewsItem();
           n.setSource(hostFrom(link));
           n.setTitle(title);
           n.setLink(link);
-          n.setPublishedAt(publishedAt);
+          n.setPublishedAt(publishedAtDate);
           n.setRawText(rawText);
           n.setSummary((summary == null || summary.isEmpty()) ? title : summary);
 
